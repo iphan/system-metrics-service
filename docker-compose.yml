@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+
+  collector:
+    build:
+      dockerfile: collectl/Dockerfile
+    image: qbio-collectl:latest
+    ports:
+      - 2655:2655
