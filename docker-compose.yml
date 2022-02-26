@@ -1,5 +1,8 @@
 version: '3'
 
+volumes:
+  db_data:
+  
 services:
 
   collector:
@@ -8,3 +11,23 @@ services:
     image: qbio-collectl:latest
     ports:
       - 2655:2655
+
+  db:
+    image: arm64v8/mysql:8.0-oracle
+    environment:
+      - MYSQL_ROOT_PASSWORD=body-scan
+      - MYSQL_DATABASE=qbio
+    ports:
+      - 3306:3306
+    volumes:
+      - db_data:/var/lib/mysql
+
+  metrics-service:
+    build:
+      dockerfile: Dockerfile
+    image: qbio-metrics:latest
+    ports:
+      - 8080:8080
+    depends_on:
+      - collector
+      - db
