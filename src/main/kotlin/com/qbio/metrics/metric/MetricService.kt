@@ -22,4 +22,10 @@ class MetricService {
         metricFormulas = metrics.associateBy({it.id!!}, {it.formula})
         metricNames = metrics.associateBy({it.name}, {it.id!!})
     }
+
+    fun addNewMetric(metric: Metric): Metric {
+        val newMetric = metricRepository.save(metric)
+        init()
+        return newMetric
+    }
 }
