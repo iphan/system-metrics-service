@@ -4,23 +4,44 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.net.Socket
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
+import javax.annotation.PostConstruct
 import kotlin.concurrent.thread
 
 @Service
 class CollectorService {
+    companion object {
+        const val SEPARATOR = " "
+        const val DATE_HEADER = "Date"
+        const val TIME_HEADER = "Time"
+        val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")
+    }
     private val log = LoggerFactory.getLogger(this::class.java)
-
 
     @Value("\${collector.address}")
     private lateinit var collectorAddress: String
 
     @Value("\${collector.port}")
-    private var collectorPort: Int = 2655
+    private val collectorPort: Int = 2655
+
+    @Value("\${collector.header}")
+    private lateinit var headerConfig: String
+
+    private lateinit var headers: List<String>
 
     private var connected = false
     private var connection: Socket? = null
     private var reader: Scanner? = null
+
+
+
+    @PostConstruct
+    fun init() {
+        headers = headerConfig.split(SEPARATOR)
+        log.info("Initialized headers $headers")
+    }
 
     fun startCollection() {
         if (connected) {
@@ -38,7 +59,29 @@ class CollectorService {
     private fun read() {
         while (connected && reader?.hasNextLine() == true) {
             val line = reader!!.nextLine()
-            log.info(line)
+            log.debug(line)
+            val measurements = parseLine(line)
+            log.info(measurements.toString())
+
+        }
+    }
+
+    private fun parseLine(line: String): TimedMeasurements? {
+
+        val measurements = line.split(SEPARATOR)
+            .mapIndexedNotNull { index, value ->
+                headers[index]?.let { it to value }
+            }.toMap()
+        val timestamp = parseDateTime(measurements[DATE_HEADER], measurements[TIME_HEADER])
+
+        return timestamp?.let { TimedMeasurements(it, measurements) }
+    }
+
+    private fun parseDateTime(date: String?, time: String?): LocalDateTime? {
+        return try {
+            LocalDateTime.parse("$date $time", DATE_TIME_FORMATTER)
+        } catch (_: Exception) {
+            null
         }
     }
 
@@ -48,3 +91,5 @@ class CollectorService {
         log.info("Collection is stopped")
     }
 }
+
+data class TimedMeasurements(val timestamp: LocalDateTime, val measurements: Map<String, String>)
