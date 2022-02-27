@@ -13,9 +13,13 @@ class MetricService {
     final lateinit var metricFormulas: Map<Int, String>
         private set
 
+    final lateinit var metricNames: Map<String, Int>
+        private set
+
     @PostConstruct
     fun init() {
-        metricFormulas = metricRepository.findAll()
-            .associateBy({it.id!!}, {it.formula})
+        val metrics = metricRepository.findAll()
+        metricFormulas = metrics.associateBy({it.id!!}, {it.formula})
+        metricNames = metrics.associateBy({it.name}, {it.id!!})
     }
 }

@@ -4,6 +4,7 @@ import com.qbio.metrics.collector.TimedMeasurements
 import com.qbio.metrics.metric.MetricService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class MeasurementService {
@@ -21,5 +22,12 @@ class MeasurementService {
                 }
             }
         measurementRepository.saveAll(measurements)
+    }
+
+    fun getMeasurementsByNameAndTimeframe(name: String, from: LocalDateTime, to: LocalDateTime?): List<Measurement> {
+        val metricId = metricService.metricNames[name] ?: return listOf()
+
+        return if (to == null) measurementRepository.findByMetricIdAndTimestampAfter(metricId, from)
+            else measurementRepository.findByMetricIdAndTimestampBetween(metricId, from, to)
     }
 }
