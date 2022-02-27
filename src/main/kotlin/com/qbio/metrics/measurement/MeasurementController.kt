@@ -14,16 +14,36 @@ class MeasurementController {
     @Autowired
     private lateinit var measurementService: MeasurementService
 
-    @GetMapping("/metrics/{metricName}")
+    @GetMapping("/measurements/{metricName}")
     fun getRawMeasurements(@PathVariable metricName: String,
                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) from: LocalDateTime,
                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) to: LocalDateTime?
                            ): ResponseEntity<MeasurementDTO> {
 
-        log.info("Requests: $metricName from $from")
+        log.info("Requests for $metricName from $from to $to")
         val measurements = measurementService.getMeasurementsByNameAndTimeframe(metricName, from, to)
             .map { TimedValue(it) }
         return if (measurements.isEmpty()) ResponseEntity.noContent().build()
         else ResponseEntity.ok(MeasurementDTO(metricName, measurements))
+    }
+
+    @GetMapping("/measurements/{metricName}/aggregate/{aggregate}")
+    fun getAggregatedMeasurements(@PathVariable metricName: String,
+                                  @PathVariable aggregate: String,
+                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) from: LocalDateTime,
+                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) to: LocalDateTime?
+    ): ResponseEntity<AggregatedMeasurementDTO> {
+
+        log.info("Aggregated request for: $metricName from $from to $to")
+        val aggregateEnum = try {
+            Aggregation.valueOf(aggregate.uppercase())
+        } catch (_ : Exception) {
+            return ResponseEntity.badRequest().build()
+        }
+        val aggregateValue = measurementService.getAggregateMeasurementsByNameAndTimeframe(
+            aggregateEnum, metricName, from, to)
+
+        return if (aggregateValue == null) ResponseEntity.noContent().build()
+        else ResponseEntity.ok(AggregatedMeasurementDTO(metricName, aggregateValue))
     }
 }

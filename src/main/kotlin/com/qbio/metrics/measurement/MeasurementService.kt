@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 
 @Service
 class MeasurementService {
+
     @Autowired
     private lateinit var measurementRepository: MeasurementRepository
 
@@ -27,7 +28,17 @@ class MeasurementService {
     fun getMeasurementsByNameAndTimeframe(name: String, from: LocalDateTime, to: LocalDateTime?): List<Measurement> {
         val metricId = metricService.metricNames[name] ?: return listOf()
 
-        return if (to == null) measurementRepository.findByMetricIdAndTimestampAfter(metricId, from)
-            else measurementRepository.findByMetricIdAndTimestampBetween(metricId, from, to)
+        return measurementRepository.findByMetricIdAndTimestampBetween(metricId, from, to ?: LocalDateTime.now())
+    }
+
+    fun getAggregateMeasurementsByNameAndTimeframe(aggregate: Aggregation, name: String,
+                                                   from: LocalDateTime, nullableTo: LocalDateTime?): Double? {
+        val metricId = metricService.metricNames[name] ?: return null
+        val to = nullableTo ?: LocalDateTime.now()
+        return when (aggregate) {
+            Aggregation.AVG -> measurementRepository.findAverageByMetricIdAndTimestampBetween(metricId, from, to)
+            Aggregation.MAX -> measurementRepository.findMaxByMetricIdAndTimestampBetween(metricId, from, to)
+            Aggregation.MIN -> measurementRepository.findMinByMetricIdAndTimestampBetween(metricId, from, to)
+        }
     }
 }
