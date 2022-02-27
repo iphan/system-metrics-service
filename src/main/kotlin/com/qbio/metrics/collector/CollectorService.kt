@@ -1,6 +1,8 @@
 package com.qbio.metrics.collector
 
+import com.qbio.metrics.measurement.MeasurementService
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.net.Socket
@@ -30,6 +32,9 @@ class CollectorService {
     private lateinit var headerConfig: String
 
     private lateinit var headers: List<String>
+
+    @Autowired
+    private lateinit var measurementService: MeasurementService
 
     private var connected = false
     private var connection: Socket? = null
@@ -61,8 +66,11 @@ class CollectorService {
             val line = reader!!.nextLine()
             log.debug(line)
             val measurements = parseLine(line)
-            log.info(measurements.toString())
-
+            if (measurements == null) {
+                log.warn("Couldn't parse line $line")
+            } else {
+                measurementService.saveMeasurements(measurements)
+            }
         }
     }
 
@@ -70,7 +78,7 @@ class CollectorService {
 
         val measurements = line.split(SEPARATOR)
             .mapIndexedNotNull { index, value ->
-                headers[index]?.let { it to value }
+                headers.getOrNull(index)?.let { it to value }
             }.toMap()
         val timestamp = parseDateTime(measurements[DATE_HEADER], measurements[TIME_HEADER])
 
@@ -92,4 +100,4 @@ class CollectorService {
     }
 }
 
-data class TimedMeasurements(val timestamp: LocalDateTime, val measurements: Map<String, String>)
+data class TimedMeasurements(val timestamp: LocalDateTime, val values: Map<String, String>)
