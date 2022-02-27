@@ -41,4 +41,15 @@ class MeasurementService {
             Aggregation.MIN -> measurementRepository.findMinByMetricIdAndTimestampBetween(metricId, from, to)
         }
     }
+
+    fun getBinnedAggregateMeasurementsByNameAndTimeframe(aggregate: Aggregation, binMinutes: Int, name: String,
+                                                         from: LocalDateTime, nullableTo: LocalDateTime?): List<BinnedResult> {
+        val metricId = metricService.metricNames[name] ?: return listOf()
+        val to = nullableTo ?: LocalDateTime.now()
+        return when (aggregate) {
+            Aggregation.AVG -> measurementRepository.findBinnedAverageByMetricIdAndTimestampBetween(metricId, binMinutes, from, to)
+            Aggregation.MAX -> measurementRepository.findBinnedMaxByMetricIdAndTimestampBetween(metricId, binMinutes, from, to)
+            Aggregation.MIN -> measurementRepository.findBinnedMinByMetricIdAndTimestampBetween(metricId, binMinutes, from, to)
+        }
+    }
 }

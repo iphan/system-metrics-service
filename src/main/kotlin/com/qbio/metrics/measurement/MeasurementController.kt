@@ -18,21 +18,21 @@ class MeasurementController {
     fun getRawMeasurements(@PathVariable metricName: String,
                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) from: LocalDateTime,
                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) to: LocalDateTime?
-                           ): ResponseEntity<MeasurementDTO> {
+                           ): ResponseEntity<DataSetDTO> {
 
         log.info("Requests for $metricName from $from to $to")
         val measurements = measurementService.getMeasurementsByNameAndTimeframe(metricName, from, to)
-            .map { TimedValue(it) }
+            .map { DataPoint(it) }
         return if (measurements.isEmpty()) ResponseEntity.noContent().build()
-        else ResponseEntity.ok(MeasurementDTO(metricName, measurements))
+        else ResponseEntity.ok(DataSetDTO(metricName, measurements))
     }
 
     @GetMapping("/measurements/{metricName}/aggregate/{aggregate}")
     fun getAggregatedMeasurements(@PathVariable metricName: String,
                                   @PathVariable aggregate: String,
                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) from: LocalDateTime,
-                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) to: LocalDateTime?
-    ): ResponseEntity<AggregatedMeasurementDTO> {
+                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) to: LocalDateTime?,
+    ): ResponseEntity<MeasurementDTO> {
 
         log.info("Aggregated request for: $metricName from $from to $to")
         val aggregateEnum = try {
@@ -44,6 +44,28 @@ class MeasurementController {
             aggregateEnum, metricName, from, to)
 
         return if (aggregateValue == null) ResponseEntity.noContent().build()
-        else ResponseEntity.ok(AggregatedMeasurementDTO(metricName, aggregateValue))
+        else ResponseEntity.ok(MeasurementDTO(metricName, aggregateValue))
+    }
+
+    @GetMapping("/measurements/{metricName}/aggregate/{aggregate}/bin-minutes/{binMinutes}")
+    fun getBinnedAggregatedMeasurements(@PathVariable metricName: String,
+                                        @PathVariable aggregate: String,
+                                        @PathVariable binMinutes: Int,
+                                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) from: LocalDateTime,
+                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) to: LocalDateTime?,
+    ): ResponseEntity<DataSetDTO> {
+
+        log.info("Aggregated request for: $metricName from $from to $to")
+        val aggregateEnum = try {
+            Aggregation.valueOf(aggregate.uppercase())
+        } catch (_ : Exception) {
+            return ResponseEntity.badRequest().build()
+        }
+        val measurements = measurementService.getBinnedAggregateMeasurementsByNameAndTimeframe(
+            aggregateEnum, binMinutes, metricName, from, to)
+            .map { DataPoint(it.getBinEnd(), it.getAggregate()) }
+
+        return if (measurements.isEmpty()) ResponseEntity.noContent().build()
+        else ResponseEntity.ok(DataSetDTO(metricName, measurements))
     }
 }
