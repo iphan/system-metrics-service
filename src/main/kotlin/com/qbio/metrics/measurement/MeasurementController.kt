@@ -18,10 +18,12 @@ class MeasurementController {
     fun getRawMeasurements(@PathVariable metricName: String,
                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) from: LocalDateTime,
                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) to: LocalDateTime?
-                           ): ResponseEntity<List<Measurement>> {
+                           ): ResponseEntity<MeasurementDTO> {
 
         log.info("Requests: $metricName from $from")
         val measurements = measurementService.getMeasurementsByNameAndTimeframe(metricName, from, to)
-        return if (measurements.isEmpty()) ResponseEntity.noContent().build() else ResponseEntity.ok(measurements)
+            .map { TimedValue(it) }
+        return if (measurements.isEmpty()) ResponseEntity.noContent().build()
+        else ResponseEntity.ok(MeasurementDTO(metricName, measurements))
     }
 }
