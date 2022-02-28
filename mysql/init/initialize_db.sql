@@ -24,13 +24,14 @@ CREATE TABLE measurements (
   value DOUBLE,
 
   PRIMARY KEY (measurement_id),
-  KEY measurements_index1 (metric_id, `timestamp`)
+  KEY measurements_index1 (metric_id, `timestamp`),
+  KEY measurements_index2 (`timestamp`)
 ) 
 ENGINE=INNODB DEFAULT CHARSET=UTF8
 COMMENT 'Raw measurements';
 
 CREATE TABLE tiered_measurements (
-  tiered_measurements_id BIGINT(20) NOT NULL AUTO_INCREMENT,
+  tiered_measurement_id BIGINT(20) NOT NULL AUTO_INCREMENT,
   tier SMALLINT NOT NULL COMMENT '1: minute level, 2: hour level',
   metric_id INT(11) NOT NULL,
   `timestamp` TIMESTAMP NOT NULL COMMENT 'End of time window',
@@ -39,8 +40,9 @@ CREATE TABLE tiered_measurements (
   max DOUBLE NULL COMMENT 'Max of the raw values',
   sample_size BIGINT(20) NULL COMMENT 'Number of raw samples',
 
-  PRIMARY KEY (tiered_measurements_id),
-  UNIQUE KEY tiered_measurements_index1 (tier, metric_id, `timestamp`)
+  PRIMARY KEY (tiered_measurement_id),
+  UNIQUE KEY tiered_measurements_index1 (tier, metric_id, `timestamp`),
+  KEY tiered_measurements_index2 (`timestamp`)
 ) 
 ENGINE=INNODB DEFAULT CHARSET=UTF8
 COMMENT 'Measurements aggregated at different tiers';
