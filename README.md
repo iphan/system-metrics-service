@@ -18,8 +18,8 @@ The service is composed of 3 Docker containers:
 ./docker-compose up --build metrics-service
 ```
 
-_Note_:</br>
-My personal laptop is using M1 Chip, so the all the docker images used are for `ARMv8 64-bit` architecture. If your machine is not using this architecture, please update the images accordingly.
+_Note_:
+> My personal laptop is using M1 Chip, so the all the docker images used are for `ARMv8 64-bit` architecture. If your machine is not using this architecture, please update the images accordingly.
 
 
 ## Usage Notes
@@ -95,4 +95,7 @@ Two levels of tiers are currently defined: minute-level and hour-level.
 A scheduled task runs every minute to query raw data for the past minute, aggregate it and store it in DB.
 A seperate scheduled task runs every hour to query raw data for the hour minute, aggregate it and store it in DB.
 
-
+_Note_:
+> I ran out of time to make the query code leverage the tiered data. At a high level, here are my ideas:
+> - Add configurations in the application properties to define when to use each tier. For example, second level is for the data from the last 7 days, minute level is for data between 7 and 90 days and hour level is for data older than 90 days. These threshold can be adjusted to tune API response time.
+> - At query time, service will query each tier of data based on the configuration and aggregate the data from each tier to return the full result set.
