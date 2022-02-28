@@ -1,6 +1,9 @@
 package com.qbio.metrics.tier
 
+import com.qbio.metrics.measurement.Aggregation
+import com.qbio.metrics.measurement.BinnedResult
 import com.qbio.metrics.measurement.MeasurementRepository
+import com.qbio.metrics.metric.MetricService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -17,6 +20,9 @@ class TierService {
 
     @Autowired
     private lateinit var tieredMeasurementRepository: TieredMeasurementRepository
+
+    @Autowired
+    private lateinit var metricService: MetricService
 
     @Scheduled(cron = "\${minute.tier.cron.schedule}")
     fun minuteLevelTiering() {
@@ -47,4 +53,25 @@ class TierService {
         tieredMeasurementRepository.saveAll(tieredMeasurements)
     }
 
+
+    fun getMeasurementsByTierAndNameAndTimeframe(tier: Tier, name: String, from: LocalDateTime, to: LocalDateTime?): List<TieredMeasurement> {
+        val metricId = metricService.metricNames[name] ?: return listOf()
+
+        return tieredMeasurementRepository.findByTierAndMetricIdAndTimestampBetween(tier, metricId, from, to ?: LocalDateTime.now())
+    }
+
+    fun getAggregateMeasurementsByTierAndNameAndTimeframe(aggregate: Aggregation, tier: Tier, name: String,
+                                                          from: LocalDateTime, nullableTo: LocalDateTime?): BinnedResult? {
+        val metricId = metricService.metricNames[name] ?: return null
+        val to = nullableTo ?: LocalDateTime.now()
+        return tieredMeasurementRepository.findAggregateByTierAndMetricIdAndTimestampBetween(tier, metricId, from, to)
+    }
+
+    fun getBinnedAggregateMeasurementsByTierAndNameAndTimeframe(aggregate: Aggregation, binMinutes: Int,
+                                                                tier: Tier, name: String,
+                                                                from: LocalDateTime, nullableTo: LocalDateTime?): List<BinnedResult> {
+        val metricId = metricService.metricNames[name] ?: return listOf()
+        val to = nullableTo ?: LocalDateTime.now()
+        return tieredMeasurementRepository.findBinnedAggregateByTierAndMetricIdAndTimestampBetween(tier, metricId, binMinutes, from, to)
+    }
 }
