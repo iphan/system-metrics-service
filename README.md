@@ -4,7 +4,7 @@
 The service is composed of 3 Docker containers:
 - The `collector` container runs `collectl` in server mode. It sends data over socket connection at port 2655
 - The `db` container runs a MySQL database. It is used to store and query the collected metrics
-- The `metrics-service` container runs the web server in charge of data management (collection, tiering, deletion) and providing query APIs
+- The `metrics-service` container runs the web server in charge of data management (collection, tiering, deletion) and providing query APIs. It is implemented in Kotlin using Spring boot.
 
 ## How to start the service?
 ```bash
