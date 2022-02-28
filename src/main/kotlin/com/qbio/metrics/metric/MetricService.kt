@@ -32,4 +32,8 @@ class MetricService {
         init()
         return newMetric
     }
+
+    fun getAllMetrics(): List<Metric> {
+        return metricsById.values.toList()
+    }
 }

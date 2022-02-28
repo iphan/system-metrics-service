@@ -14,4 +14,10 @@ class MetricController {
         val newMetric = metricService.addNewMetric(metric)
         return ResponseEntity.ok(newMetric)
     }
+
+    @GetMapping("metrics")
+    fun getMetrics(): ResponseEntity<List<Metric>> {
+        return ResponseEntity.ok(metricService.getAllMetrics())
+    }
+
 }
