@@ -19,7 +19,7 @@ The service is composed of 3 Docker containers:
 ```
 
 _Note_:
-> My personal laptop is using M1 Chip, so the all the docker images used are for `ARMv8 64-bit` architecture. If your machine is not using this architecture, please update the images accordingly.
+> My personal laptop is using M1 Chip, so the all the docker images used are for `ARMv8 64-bit` architecture. If your machine is not using this architecture, please update the images accordingly in the `Dockerfile` and `docker-compose.yml`.
 
 ## How to run unit tests?
 ```bash
@@ -64,11 +64,11 @@ curl -i "http://localhost:8080/measurements/memory-usage-percent?from=2022-02-26
 ```
 
 #### Aggregated result
-This API returns raw data for one metric. 
+This API returns one aggregated result for one metric. 
 - The `metric-name` must match one of the metric configured, otherwise nothing is returned. 
 - The `aggregate-function` to be used, accepted values are `avg`, `min`, `max`.
-- The `from` query parameter is mandatory. 
-- The `to` query parameter is optional, if not provided all the data from `from` until now will be returned.
+- The `from` query parameter requires a timestamp in ISO format.
+- The `to` query parameter is optional, if not provided all the data from `from` until now will be used.
 ```
 # GET /measurements/{metric-name}/aggregate/{aggregate-function}?from={timestamp_in_iso_format}&to={timestamp_in_iso_format}
 curl -i "http://localhost:8080/measurements/memory-usage-percent/aggregate/avg?from=2022-02-26T04:02:11"
@@ -77,12 +77,12 @@ curl -i "http://localhost:8080/measurements/memory-usage-percent/aggregate/max?f
 ```
 
 #### Aggregated binned result
-This API returns raw data for one metric. 
+This API returns aggregated results binned by X minutes for one metric. 
 - The `metric-name` must match one of the metric configured, otherwise nothing is returned. 
 - The `aggregate-function` to be used, accepted values are `avg`, `min`, `max`.
 - The `bin-minute-amount` is the bin duration in minutes.
-- The `from` query parameter is mandatory. 
-- The `to` query parameter is optional, if not provided all the data from `from` until now will be returned.
+- The `from` query parameter requires a timestamp in ISO format.
+- The `to` query parameter is optional, if not provided all the data from `from` until now will be used.
 ```
 # GET /measurements/{metric-name}/aggregate/{aggregate-function}/bin-minutes/{bin-minute-amount}?from={timestamp_in_iso_format}&to={timestamp_in_iso_format}
 curl -i "http://localhost:8080/measurements/memory-usage-percent/aggregate/avg/bin-minutes/10?from=2022-02-26T04:02:11"
@@ -92,12 +92,16 @@ curl -i "http://localhost:8080/measurements/memory-usage-percent/aggregate/max/b
 
 ### Data Retention
 Data retention policy is defined by `data.retention.in.days` application property.
-A scheduled task runs every hour on the `metrics-service` and deletes any data older than the configured retention policy.
+
+The `metrics-service` executes a task runs on a schedule configured by `data.retention.cron.schedule` to delete any data older than the configured retention policy.
+
 
 ### Tiering
 Two levels of tiers are currently defined: minute-level and hour-level.
-A scheduled task runs every minute to query raw data for the past minute, aggregate it and store it in DB.
-A seperate scheduled task runs every hour to query raw data for the hour minute, aggregate it and store it in DB.
+
+A scheduled task runs every minute to query raw data for the past minute, aggregate it and store it in DB. The scheduled can be adjusted by `minute.tier.cron.schedule` application property.
+
+A seperate scheduled task runs every hour to query raw data for the hour minute, aggregate it and store it in DB. The scheduled can be adjusted by `hour.tier.cron.schedule` application property.
 
 _Note_:
 > I ran out of time to add much unit tests and make the query code leverage the tiered data. 
