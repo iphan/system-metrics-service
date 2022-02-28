@@ -36,10 +36,10 @@ class Metric(
 
     fun applyOperand(values: List<Double>): Double? {
         return when (operand) {
-            "+" -> values.reduceOrNull { sum, value -> sum + value }
-            "-" -> values.reduceOrNull { total, value -> total - value }
-            "*" -> values.reduceOrNull { total, value -> total * value }
-            "/" -> if (values.drop(1).contains(0.0)) null else values.reduceOrNull { numerator, denominator -> numerator / denominator }
+            "+" -> values.reduceOrNull(Double::plus)
+            "-" -> values.reduceOrNull(Double::minus)
+            "*" -> values.reduceOrNull(Double::times)
+            "/" -> if (values.drop(1).contains(0.0)) null else values.reduceOrNull(Double::div)
             else -> null
         }
     }

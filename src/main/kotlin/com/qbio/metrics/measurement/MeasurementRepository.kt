@@ -10,6 +10,8 @@ interface MeasurementRepository : CrudRepository<Measurement, Long> {
 
     fun findByMetricIdAndTimestampBetween(metricId: Int, from: LocalDateTime, to: LocalDateTime): List<Measurement>
 
+    fun findByTimestampBetween(from: LocalDateTime, to: LocalDateTime): List<Measurement>
+
     @Query("SELECT avg(value) from Measurement WHERE metricId = :metricId AND timestamp BETWEEN :from AND :to")
     fun findAverageByMetricIdAndTimestampBetween(@Param("metricId") metricId: Int,
                                                  @Param("from") from: LocalDateTime,

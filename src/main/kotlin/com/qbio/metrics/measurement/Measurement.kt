@@ -11,7 +11,7 @@ class Measurement(
     var value: Double
 ) {
     @Id
-    @Column(name = "measurementId")
+    @Column(name = "measurement_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 }
