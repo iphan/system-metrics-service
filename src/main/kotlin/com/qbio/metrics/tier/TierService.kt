@@ -23,16 +23,28 @@ class TierService {
         val now = LocalDateTime.now().minusMinutes(1)
         val from = now.withSecond(0).withNano(0)
         val to = now.withSecond(59).withNano(0)
-        log.info("Running scheduled task for minute tier from $from to $to")
 
+        findAndAggregateMeasurements(Tier.MINUTE, from, to)
+    }
+
+    @Scheduled(cron = "\${hour.tier.cron.schedule}")
+    fun hourLevelTiering() {
+        val now = LocalDateTime.now().minusHours(1)
+        val from = now.withMinute(0).withSecond(0).withNano(0)
+        val to = now.withMinute(59).withSecond(59).withNano(0)
+
+        findAndAggregateMeasurements(Tier.HOUR, from, to)
+    }
+
+    private fun findAndAggregateMeasurements(tier: Tier, from: LocalDateTime, to: LocalDateTime) {
+        log.info("Aggregating data for $tier tier from $from to $to")
         val tieredMeasurements = measurementRepository.findByTimestampBetween(from, to)
             .groupBy( { it.metricId }, {it.value} )
             .map { (metricId, values) ->
-                TieredMeasurement(Tier.MINUTE, metricId, to, values)
+                TieredMeasurement(tier, metricId, to, values)
             }
 
         tieredMeasurementRepository.saveAll(tieredMeasurements)
-
     }
 
 }
