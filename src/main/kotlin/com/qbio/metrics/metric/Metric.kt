@@ -34,7 +34,7 @@ class Metric(
         fields = formula.split(operand).map { it.trim() }
     }
 
-    fun applyFormula(values: List<Double>): Double? {
+    fun applyOperand(values: List<Double>): Double? {
         return when (operand) {
             "+" -> values.reduceOrNull { sum, value -> sum + value }
             "-" -> values.reduceOrNull { total, value -> total - value }

@@ -21,7 +21,7 @@ class MeasurementService {
             .mapNotNull { (metricId, metric) ->
                 val values = metric.fields
                     .mapNotNull { rawMeasurements.values[it]?.toDoubleOrNull() }
-                metric.applyFormula(values)
+                metric.applyOperand(values)
                     ?.let { Measurement(metricId, rawMeasurements.timestamp, it) }
             }
         measurementRepository.saveAll(measurements)

@@ -15,6 +15,7 @@ internal class CollectorParserTest {
     }
 
     private val sut = CollectorParser()
+
     @BeforeEach
     fun init() {
         sut.setHeaderConfig(TEST_HEADERS)
