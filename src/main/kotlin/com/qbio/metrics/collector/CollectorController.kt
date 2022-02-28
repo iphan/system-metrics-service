@@ -12,6 +12,9 @@ class CollectorController {
     @Autowired
     private lateinit var collectorService: CollectorService
 
+    @Autowired
+    private lateinit var collectorParser: CollectorParser
+
     @PutMapping("collector/on")
     fun turnOnCollector(): ResponseEntity<Void> {
         collectorService.startCollection()
@@ -26,6 +29,6 @@ class CollectorController {
 
     @GetMapping("collector/headers")
     fun gerHeaders(): ResponseEntity<List<String>> {
-        return ResponseEntity.ok(collectorService.headers)
+        return ResponseEntity.ok(collectorParser.headers)
     }
 }
