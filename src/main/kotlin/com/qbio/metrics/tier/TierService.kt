@@ -1,6 +1,5 @@
 package com.qbio.metrics.tier
 
-import com.qbio.metrics.measurement.Aggregation
 import com.qbio.metrics.measurement.BinnedResult
 import com.qbio.metrics.measurement.MeasurementRepository
 import com.qbio.metrics.metric.MetricService
@@ -60,14 +59,14 @@ class TierService {
         return tieredMeasurementRepository.findByTierAndMetricIdAndTimestampBetween(tier, metricId, from, to ?: LocalDateTime.now())
     }
 
-    fun getAggregateMeasurementsByTierAndNameAndTimeframe(aggregate: Aggregation, tier: Tier, name: String,
+    fun getAggregateMeasurementsByTierAndNameAndTimeframe(tier: Tier, name: String,
                                                           from: LocalDateTime, nullableTo: LocalDateTime?): BinnedResult? {
         val metricId = metricService.metricNames[name] ?: return null
         val to = nullableTo ?: LocalDateTime.now()
         return tieredMeasurementRepository.findAggregateByTierAndMetricIdAndTimestampBetween(tier, metricId, from, to)
     }
 
-    fun getBinnedAggregateMeasurementsByTierAndNameAndTimeframe(aggregate: Aggregation, binMinutes: Int,
+    fun getBinnedAggregateMeasurementsByTierAndNameAndTimeframe(binMinutes: Int,
                                                                 tier: Tier, name: String,
                                                                 from: LocalDateTime, nullableTo: LocalDateTime?): List<BinnedResult> {
         val metricId = metricService.metricNames[name] ?: return listOf()

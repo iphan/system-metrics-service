@@ -36,14 +36,14 @@ class MeasurementService {
         return measurementRepository.findByMetricIdAndTimestampBetween(metricId, from, to ?: LocalDateTime.now())
     }
 
-    fun getAggregateMeasurementsByNameAndTimeframe(aggregate: Aggregation, name: String,
+    fun getAggregateMeasurementsByNameAndTimeframe(name: String,
                                                    from: LocalDateTime, nullableTo: LocalDateTime?): BinnedResult? {
         val metricId = metricService.metricNames[name] ?: return null
         val to = nullableTo ?: LocalDateTime.now()
         return measurementRepository.findAggregateByMetricIdAndTimestampBetween(metricId, from, to)
     }
 
-    fun getBinnedAggregateMeasurementsByNameAndTimeframe(aggregate: Aggregation, binMinutes: Int, name: String,
+    fun getBinnedAggregateMeasurementsByNameAndTimeframe(binMinutes: Int, name: String,
                                                          from: LocalDateTime, nullableTo: LocalDateTime?): List<BinnedResult> {
         val metricId = metricService.metricNames[name] ?: return listOf()
         val to = nullableTo ?: LocalDateTime.now()

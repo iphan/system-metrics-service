@@ -42,7 +42,7 @@ class QueryController {
             return ResponseEntity.badRequest().build()
         }
         val result = measurementService.getAggregateMeasurementsByNameAndTimeframe(
-            aggregateEnum, metricName, from, to)
+            metricName, from, to)
 
         return if (result == null) ResponseEntity.noContent().build()
         else ResponseEntity.ok(MeasurementDTO(metricName, result.computeResult(aggregateEnum)))
@@ -63,7 +63,7 @@ class QueryController {
             return ResponseEntity.badRequest().build()
         }
         val measurements = measurementService.getBinnedAggregateMeasurementsByNameAndTimeframe(
-            aggregateEnum, binMinutes, metricName, from, to)
+            binMinutes, metricName, from, to)
             .map { DataPoint(it.getBinEnd(), it.computeResult(aggregateEnum)) }
 
         return if (measurements.isEmpty()) ResponseEntity.noContent().build()
