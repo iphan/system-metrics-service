@@ -101,7 +101,7 @@ Two levels of tiers are currently defined: minute-level and hour-level.
 
 A scheduled task runs every minute to query raw data for the past minute, aggregate it and store it in DB. The scheduled can be adjusted by `minute.tier.cron.schedule` application property.
 
-A seperate scheduled task runs every hour to query raw data for the hour minute, aggregate it and store it in DB. The scheduled can be adjusted by `hour.tier.cron.schedule` application property.
+A seperate scheduled task runs every hour to query raw data for the past hour, aggregate it and store it in DB. The scheduled can be adjusted by `hour.tier.cron.schedule` application property.
 
 _Note_:
 > I ran out of time to add much unit tests and make the query code leverage the tiered data. 
