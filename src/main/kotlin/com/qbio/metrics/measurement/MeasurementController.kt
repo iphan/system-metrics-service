@@ -40,11 +40,11 @@ class MeasurementController {
         } catch (_ : Exception) {
             return ResponseEntity.badRequest().build()
         }
-        val aggregateValue = measurementService.getAggregateMeasurementsByNameAndTimeframe(
+        val result = measurementService.getAggregateMeasurementsByNameAndTimeframe(
             aggregateEnum, metricName, from, to)
 
-        return if (aggregateValue == null) ResponseEntity.noContent().build()
-        else ResponseEntity.ok(MeasurementDTO(metricName, aggregateValue))
+        return if (result == null) ResponseEntity.noContent().build()
+        else ResponseEntity.ok(MeasurementDTO(metricName, result.computeResult(aggregateEnum)))
     }
 
     @GetMapping("/measurements/{metricName}/aggregate/{aggregate}/bin-minutes/{binMinutes}")
@@ -63,7 +63,7 @@ class MeasurementController {
         }
         val measurements = measurementService.getBinnedAggregateMeasurementsByNameAndTimeframe(
             aggregateEnum, binMinutes, metricName, from, to)
-            .map { DataPoint(it.getBinEnd(), it.getAggregate()) }
+            .map { DataPoint(it.getBinEnd(), it.computeResult(aggregateEnum)) }
 
         return if (measurements.isEmpty()) ResponseEntity.noContent().build()
         else ResponseEntity.ok(DataSetDTO(metricName, measurements))

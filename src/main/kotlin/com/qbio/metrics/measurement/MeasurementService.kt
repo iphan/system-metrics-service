@@ -34,7 +34,7 @@ class MeasurementService {
     }
 
     fun getAggregateMeasurementsByNameAndTimeframe(aggregate: Aggregation, name: String,
-                                                   from: LocalDateTime, nullableTo: LocalDateTime?): Double? {
+                                                   from: LocalDateTime, nullableTo: LocalDateTime?): BinnedResult? {
         val metricId = metricService.metricNames[name] ?: return null
         val to = nullableTo ?: LocalDateTime.now()
         return when (aggregate) {

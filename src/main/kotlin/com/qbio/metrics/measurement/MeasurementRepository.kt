@@ -12,20 +12,32 @@ interface MeasurementRepository : CrudRepository<Measurement, Long> {
 
     fun findByTimestampBetween(from: LocalDateTime, to: LocalDateTime): List<Measurement>
 
-    @Query("SELECT avg(value) from Measurement WHERE metricId = :metricId AND timestamp BETWEEN :from AND :to")
+    @Query("""SELECT :to AS binEnd,
+                     sum(value) AS aggregate,
+                     count(1) AS sampleSize
+              FROM measurements 
+              WHERE metric_id = :metricId AND timestamp BETWEEN :from AND :to""", nativeQuery = true)
     fun findAverageByMetricIdAndTimestampBetween(@Param("metricId") metricId: Int,
                                                  @Param("from") from: LocalDateTime,
-                                                 @Param("to") to: LocalDateTime): Double?
+                                                 @Param("to") to: LocalDateTime): BinnedResult?
 
-    @Query("SELECT max(value) from Measurement WHERE metricId = :metricId AND timestamp BETWEEN :from AND :to")
+    @Query("""SELECT :to AS binEnd,
+                     max(value) AS aggregate,
+                     count(1) AS sampleSize
+              FROM measurements 
+              WHERE metric_id = :metricId AND timestamp BETWEEN :from AND :to""", nativeQuery = true)
     fun findMaxByMetricIdAndTimestampBetween(@Param("metricId") metricId: Int,
                                              @Param("from") from: LocalDateTime,
-                                             @Param("to") to: LocalDateTime): Double?
+                                             @Param("to") to: LocalDateTime): BinnedResult?
 
-    @Query("SELECT min(value) from Measurement WHERE metricId = :metricId AND timestamp BETWEEN :from AND :to")
+    @Query("""SELECT :to AS binEnd,
+                     min(value) AS aggregate,
+                     count(1) AS sampleSize
+              FROM measurements 
+              WHERE metric_id = :metricId AND timestamp BETWEEN :from AND :to""", nativeQuery = true)
     fun findMinByMetricIdAndTimestampBetween(@Param("metricId") metricId: Int,
                                              @Param("from") from: LocalDateTime,
-                                             @Param("to") to: LocalDateTime): Double?
+                                             @Param("to") to: LocalDateTime): BinnedResult?
 
     @Query("""SELECT FROM_UNIXTIME((CEIL(UNIX_TIMESTAMP(timestamp) / (:binMinutes * 60)) * :binMinutes * 60) - 1) AS binEnd,
                      SUM(value) as aggregate,
@@ -65,4 +77,16 @@ interface BinnedResult {
     fun getBinEnd(): LocalDateTime
     fun getAggregate(): Double
     fun getSampleSize(): Long
+}
+
+fun BinnedResult.getAverage(): Double {
+    return if (getSampleSize() != 0L) getAggregate() / getSampleSize()
+    else Double.NaN
+}
+
+fun BinnedResult.computeResult(aggregate: Aggregation): Double {
+    return when(aggregate) {
+        Aggregation.AVG -> getAverage()
+        else -> getAggregate()
+    }
 }
