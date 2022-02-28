@@ -10,6 +10,8 @@ import java.time.LocalDateTime
 @Service
 class MeasurementService {
 
+    private val log = LoggerFactory.getLogger(this::class.java)
+
     @Autowired
     private lateinit var measurementRepository: MeasurementRepository
 
@@ -24,7 +26,8 @@ class MeasurementService {
                 metric.applyOperand(values)
                     ?.let { Measurement(metricId, rawMeasurements.timestamp, it) }
             }
-        measurementRepository.saveAll(measurements)
+        val entities = measurementRepository.saveAll(measurements)
+        log.info("Saved ${entities.count()} measurements")
     }
 
     fun getMeasurementsByNameAndTimeframe(name: String, from: LocalDateTime, to: LocalDateTime?): List<Measurement> {
