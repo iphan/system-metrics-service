@@ -71,6 +71,8 @@ interface MeasurementRepository : CrudRepository<Measurement, Long> {
                                                    @Param("binMinutes") binMinutes: Int,
                                                    @Param("from") from: LocalDateTime,
                                                    @Param("to") to: LocalDateTime): List<BinnedResult>
+
+    fun deleteByTimestampBefore(expirationDate: LocalDateTime)
 }
 
 interface BinnedResult {
