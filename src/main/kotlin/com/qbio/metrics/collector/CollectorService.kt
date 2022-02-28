@@ -31,7 +31,8 @@ class CollectorService {
     @Value("\${collector.header}")
     private lateinit var headerConfig: String
 
-    private lateinit var headers: List<String>
+    final lateinit var headers: List<String>
+        private set
 
     @Autowired
     private lateinit var measurementService: MeasurementService
