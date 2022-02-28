@@ -1,5 +1,6 @@
-package com.qbio.metrics.measurement
+package com.qbio.metrics.query
 
+import com.qbio.metrics.measurement.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.format.annotation.DateTimeFormat
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
 @RestController()
-class MeasurementController {
+class QueryController {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     @Autowired
