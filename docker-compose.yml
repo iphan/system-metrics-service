@@ -7,13 +7,14 @@ services:
 
   collector:
     build:
+      context: .
       dockerfile: collectl/Dockerfile
     image: qbio-collectl:latest
     ports:
       - 2655:2655
 
   db:
-    image: arm64v8/mysql:8.0-oracle
+    image: arm64v8/mysql:8.0-oracle 
     environment:
       - MYSQL_ROOT_PASSWORD=body-scan
       - MYSQL_DATABASE=qbio
@@ -25,6 +26,7 @@ services:
 
   metrics-service:
     build:
+      context: .
       dockerfile: Dockerfile
     image: qbio-metrics:latest
     ports:
