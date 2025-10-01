@@ -1,5 +1,7 @@
-# qbio-metrics
+# system-metrics-service
 
+
+This service collects system metrics (eg. CPU utilization, memory utilization, network I/O, etc.) from a host machine and exposes them via HTTP APIs. It supports configurable data retention, time-window queries, and aggregated measurements.
 
 The service is composed of 3 Docker containers:
 - The `collector` container runs `collectl` in server mode. It sends data over socket connection at port 2655
